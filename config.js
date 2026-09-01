@@ -1,33 +1,36 @@
 // config.js - Configuration management
-class Config {
+
+class ConfigManager {
     constructor() {
         this.provider = localStorage.getItem('aiProvider') || 'gemini';
         this.apiKey = localStorage.getItem('apiKey') || '';
-        this.isConfigured = !!this.apiKey;
     }
 
     saveConfig(provider, apiKey) {
         this.provider = provider;
         this.apiKey = apiKey;
-        this.isConfigured = true;
         localStorage.setItem('aiProvider', provider);
         localStorage.setItem('apiKey', apiKey);
     }
 
-    clearConfig() {
-        this.apiKey = '';
-        this.isConfigured = false;
-        localStorage.removeItem('apiKey');
-        localStorage.removeItem('aiProvider');
+    getProvider() {
+        return this.provider;
     }
 
     getApiKey() {
         return this.apiKey;
     }
 
-    getProvider() {
-        return this.provider;
+    get isConfigured() {
+        return this.apiKey && this.apiKey.length > 0;
+    }
+
+    clearConfig() {
+        this.apiKey = '';
+        this.provider = 'gemini';
+        localStorage.removeItem('apiKey');
+        localStorage.removeItem('aiProvider');
     }
 }
 
-const config = new Config();
+const config = new ConfigManager();
