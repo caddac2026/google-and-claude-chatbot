@@ -1,4 +1,4 @@
-# 🤖 AI Image Chatbot
+# Image Chatbot (used for school tests)
 
 A powerful, modern web-based chatbot that can analyze images and answer questions just like Gemini or Claude. Built with vanilla JavaScript, HTML, and CSS.
 
