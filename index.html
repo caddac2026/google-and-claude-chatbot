@@ -3,63 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Chatbot</title>
+    <title>AI Image Chatbot - Premium Experience</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🤖 AI Image Chatbot</h1>
-            <p>Ask questions about images and text</p>
-        </div>
-
-        <div class="setup-panel" id="setupPanel">
-            <h2>Setup</h2>
-            <div class="form-group">
-                <label for="apiProvider">Select AI Provider:</label>
-                <select id="apiProvider">
-                    <option value="gemini">Google Gemini</option>
-                    <option value="claude">Anthropic Claude</option>
-                </select>
+    <!-- Login & Registration Modal -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h1>🤖 AI Chatbot</h1>
+                <p>Your Advanced AI Assistant</p>
             </div>
-            <div class="form-group">
-                <label for="apiKey">API Key:</label>
-                <input type="password" id="apiKey" placeholder="Enter your API key">
-            </div>
-            <button id="saveConfig" class="btn btn-primary">Save Configuration</button>
-            <p class="info-text">
-                💡 Get API keys from:
-                <a href="https://makersuite.google.com/app/apikey" target="_blank">Google Gemini</a> |
-                <a href="https://console.anthropic.com/" target="_blank">Anthropic Claude</a>
-            </p>
-        </div>
 
-        <div class="chat-container" id="chatContainer" style="display:none;">
-            <div class="chat-messages" id="chatMessages"></div>
-
-            <div class="input-area">
-                <div class="file-input-wrapper">
-                    <input type="file" id="imageInput" accept="image/*" multiple>
-                    <label for="imageInput" class="file-label">📷 Add Images</label>
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <h2>Sign In</h2>
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
                 </div>
-                
-                <div class="preview-container" id="previewContainer"></div>
-
-                <div class="input-wrapper">
-                    <textarea id="userInput" placeholder="Ask me anything about the images or any question..." rows="3"></textarea>
-                    <button id="sendBtn" class="btn btn-send">Send</button>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
                 </div>
-            </div>
+                <button type="submit" class="btn btn-auth">Sign In</button>
+                <p class="auth-toggle">Don't have an account? <a href="#" onclick="toggleAuthForm(event)">Sign Up</a></p>
+            </form>
 
-            <div class="action-buttons">
-                <button id="clearChat" class="btn btn-secondary">Clear Chat</button>
-                <button id="logout" class="btn btn-secondary">Logout</button>
-            </div>
+            <!-- Sign Up Form -->
+            <form id="signupForm" class="auth-form">
+                <h2>Create Account</h2>
+                <div class="form-group">
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" placeholder="Create a password" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupConfirm">Confirm Password</label>
+                    <input type="password" id="signupConfirm" placeholder="Confirm your password" required>
+                </div>
+                <button type="submit" class="btn btn-auth">Create Account</button>
+                <p class="auth-toggle">Already have an account? <a href="#" onclick="toggleAuthForm(event)">Sign In</a></p>
+            </form>
+
+            <div class="auth-message" id="authMessage"></div>
         </div>
     </div>
 
+    <!-- Main Application -->
+    <div class="app-wrapper" id="appWrapper" style="display:none;">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>💬 Conversations</h2>
+                <button class="btn-icon" id="newChatBtn" title="New Chat">➕</button>
+            </div>
+
+            <div class="conversations-list" id="conversationsList">
+                <!-- Conversations populated here -->
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-details">
+                        <p class="user-name" id="userName">User</p>
+                        <p class="user-email" id="userEmail">user@example.com</p>
+                    </div>
+                </div>
+                <button class="btn-settings" id="settingsBtn" title="Settings">⚙️</button>
+                <button class="btn-logout" id="logoutBtn" title="Logout">🚪</button>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-area">
+            <!-- Header -->
+            <header class="chat-header">
+                <div class="header-left">
+                    <button class="btn-menu" id="menuBtn">☰</button>
+                    <h1 id="chatTitle">New Conversation</h1>
+                </div>
+                <div class="header-right">
+                    <button class="btn-icon" id="shareBtn" title="Share">🔗</button>
+                    <button class="btn-icon" id="deleteBtn" title="Delete">🗑️</button>
+                </div>
+            </header>
+
+            <!-- Messages Container -->
+            <div class="messages-container" id="messagesContainer">
+                <div class="welcome-section">
+                    <div class="welcome-icon">🤖</div>
+                    <h2>Welcome to AI Chatbot</h2>
+                    <p>Ask me anything. I can analyze images, answer questions, and help you with any task.</p>
+                    <div class="quick-actions">
+                        <button class="quick-action" data-prompt="Write a creative story">📖 Story</button>
+                        <button class="quick-action" data-prompt="Analyze this image">🔍 Analyze</button>
+                        <button class="quick-action" data-prompt="Help me code">💻 Code</button>
+                        <button class="quick-action" data-prompt="Answer my question">❓ Question</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-section">
+                <!-- Setup Panel -->
+                <div class="setup-panel" id="setupPanel">
+                    <div class="setup-content">
+                        <h3>⚙️ API Configuration</h3>
+                        <div class="form-group">
+                            <label for="apiProvider">AI Provider</label>
+                            <select id="apiProvider">
+                                <option value="gemini">Google Gemini</option>
+                                <option value="claude">Anthropic Claude</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="apiKey">API Key</label>
+                            <input type="password" id="apiKey" placeholder="Enter your API key">
+                            <small>Get keys from <a href="https://makersuite.google.com/app/apikey" target="_blank">Gemini</a> or <a href="https://console.anthropic.com/" target="_blank">Claude</a></small>
+                        </div>
+                        <button id="saveConfig" class="btn btn-primary">Save Configuration</button>
+                    </div>
+                </div>
+
+                <!-- Message Input -->
+                <div class="input-area">
+                    <!-- Image Preview -->
+                    <div class="image-preview-container" id="imagePreviewContainer"></div>
+
+                    <!-- Input Row -->
+                    <div class="input-row">
+                        <div class="input-actions">
+                            <button class="btn-action" id="imageUploadBtn" title="Upload Image">📷</button>
+                            <input type="file" id="imageInput" accept="image/*" multiple style="display:none;">
+                        </div>
+                        <textarea id="messageInput" placeholder="Ask me anything... (Shift+Enter for new line)" rows="1"></textarea>
+                        <button class="btn-send" id="sendBtn">
+                            <span>Send</span>
+                            <span class="send-icon">→</span>
+                        </button>
+                    </div>
+                    <p class="input-hint">Press Enter to send • Shift+Enter for new line</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Settings Modal -->
+        <div class="modal" id="settingsModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button class="btn-close" id="closeSettings">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h3>Appearance</h3>
+                        <div class="setting-item">
+                            <label>Theme</label>
+                            <select id="themeSelect">
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>API Settings</h3>
+                        <div class="setting-item">
+                            <label for="providerSelect">AI Provider</label>
+                            <select id="providerSelect">
+                                <option value="gemini">Google Gemini</option>
+                                <option value="claude">Anthropic Claude</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label for="apiKeyDisplay">API Key</label>
+                            <input type="password" id="apiKeyDisplay" readonly>
+                            <button class="btn-secondary" id="changeApiBtn">Change API Key</button>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>Account</h3>
+                        <button class="btn-danger" id="deleteAccountBtn">Delete Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <script src="db.js"></script>
     <script src="config.js"></script>
     <script src="api.js"></script>
+    <script src="auth.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
