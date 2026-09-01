@@ -1,51 +1,54 @@
-// api.js - API integration for Gemini and Claude
+// api.js - API communication with Google Gemini and Claude
 
-class AIApi {
-    constructor(provider, apiKey) {
-        this.provider = provider;
-        this.apiKey = apiKey;
+class APIManager {
+    constructor() {
+        this.provider = config.getProvider();
+        this.apiKey = config.getApiKey();
     }
 
     async sendMessage(message, images = []) {
+        if (!this.apiKey) {
+            throw new Error('API key not configured');
+        }
+
+        this.provider = config.getProvider();
+        this.apiKey = config.getApiKey();
+
         if (this.provider === 'gemini') {
-            return this.sendToGemini(message, images);
+            return await this.sendToGemini(message, images);
         } else if (this.provider === 'claude') {
-            return this.sendToClaude(message, images);
+            return await this.sendToClaude(message, images);
+        } else {
+            throw new Error('Unknown API provider');
         }
     }
 
     async sendToGemini(message, images = []) {
-        const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + this.apiKey;
-
-        let content = [];
-
-        // Add images first
-        for (const imageData of images) {
-            content.push({
-                inlineData: {
-                    mimeType: imageData.mimeType,
-                    data: imageData.data
-                }
-            });
-        }
-
-        // Add text message
-        content.push({
-            text: message
-        });
-
         try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: content
-                    }]
-                })
-            });
+            const body = {
+                contents: [{
+                    parts: [
+                        { text: message },
+                        ...images.map(img => ({
+                            inlineData: {
+                                mimeType: img.mimeType,
+                                data: img.data
+                            }
+                        }))
+                    ]
+                }]
+            };
+
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.apiKey}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                }
+            );
 
             if (!response.ok) {
                 const error = await response.json();
@@ -53,42 +56,40 @@ class AIApi {
             }
 
             const data = await response.json();
+            
+            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                throw new Error('Invalid response from Gemini API');
+            }
+
             return data.candidates[0].content.parts[0].text;
         } catch (error) {
-            throw new Error('Gemini Error: ' + error.message);
+            throw new Error(`Gemini API Error: ${error.message}`);
         }
     }
 
     async sendToClaude(message, images = []) {
-        const url = 'https://api.anthropic.com/v1/messages';
-
-        let content = [];
-
-        // Add images first
-        for (const imageData of images) {
-            content.push({
-                type: 'image',
-                source: {
-                    type: 'base64',
-                    media_type: imageData.mimeType,
-                    data: imageData.data.split(',')[1] // Remove the data:image/png;base64, prefix
-                }
-            });
-        }
-
-        // Add text message
-        content.push({
-            type: 'text',
-            text: message
-        });
-
         try {
-            const response = await fetch(url, {
+            const content = [
+                ...images.map(img => ({
+                    type: 'image',
+                    source: {
+                        type: 'base64',
+                        media_type: img.mimeType,
+                        data: img.data
+                    }
+                })),
+                {
+                    type: 'text',
+                    text: message
+                }
+            ];
+
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
                 method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json',
                     'x-api-key': this.apiKey,
-                    'anthropic-version': '2023-06-01',
-                    'content-type': 'application/json',
+                    'anthropic-version': '2023-06-01'
                 },
                 body: JSON.stringify({
                     model: 'claude-3-5-sonnet-20241022',
@@ -106,16 +107,26 @@ class AIApi {
             }
 
             const data = await response.json();
+            
+            if (!data.content || !data.content[0]) {
+                throw new Error('Invalid response from Claude API');
+            }
+
             return data.content[0].text;
         } catch (error) {
-            throw new Error('Claude Error: ' + error.message);
+            throw new Error(`Claude API Error: ${error.message}`);
         }
+    }
+
+    updateConfig(provider, apiKey) {
+        this.provider = provider;
+        this.apiKey = apiKey;
     }
 }
 
-let api = null;
+const api = new APIManager();
 
+// Initialize API with config
 function initializeAPI(provider, apiKey) {
-    api = new AIApi(provider, apiKey);
-    return api;
+    api.updateConfig(provider, apiKey);
 }
