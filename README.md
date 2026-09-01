@@ -306,7 +306,7 @@ For issues or questions:
 
 ## Credits
 
-Built with ❤️ using vanilla JavaScript, HTML, and CSS.
+Built by me (hidden mode used if your teacher is able to see file tabs and saves login)
 
 ---
 
