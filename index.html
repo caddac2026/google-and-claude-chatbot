@@ -3,211 +3,987 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Chatbot - Premium Experience</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>AI Image Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Auth Container */
+        #authContainer {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .auth-box {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .auth-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .auth-toggle button {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        .auth-message {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .auth-message.error {
+            display: block;
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .auth-message.success {
+            display: block;
+            background: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+
+        #loginForm,
+        #signupForm {
+            display: none;
+        }
+
+        #loginForm.active,
+        #signupForm.active {
+            display: block;
+        }
+
+        /* App Wrapper */
+        #appWrapper {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            background: #fff;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #1a1a1a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .sidebar-buttons {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .sidebar-btn {
+            flex: 1;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .sidebar-btn:hover {
+            background: #764ba2;
+        }
+
+        .conversations-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 0;
+        }
+
+        .conversation-item {
+            padding: 12px 15px;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #ccc;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .conversation-item:hover {
+            background: #2a2a2a;
+        }
+
+        .conversation-item.active {
+            background: #667eea;
+            border-left-color: #764ba2;
+            color: white;
+        }
+
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .user-info {
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .footer-buttons {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .footer-btn {
+            flex: 1;
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .footer-btn:hover {
+            background: #444;
+        }
+
+        .hidden-mode-btn {
+            background: #444 !important;
+        }
+
+        .hidden-mode-btn:hover {
+            background: #555 !important;
+        }
+
+        /* Main Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-action-btn {
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .chat-action-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.assistant {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 60%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .message-images {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .message-image {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+        .welcome-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: #999;
+        }
+
+        .welcome-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-section h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .welcome-section p {
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .quick-action {
+            padding: 10px 16px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .quick-action:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 20px;
+            background: #f5f5f5;
+            border-top: 1px solid #ddd;
+        }
+
+        .image-preview-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .preview-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            overflow: hidden;
+            background: white;
+            border: 1px solid #ddd;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-remove {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 20px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-remove:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            max-height: 100px;
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-buttons {
+            display: flex;
+            gap: 8px;
+            flex-direction: column;
+        }
+
+        .input-button {
+            padding: 12px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .input-button:hover {
+            background: #764ba2;
+        }
+
+        .input-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #imageUploadBtn {
+            background: #764ba2;
+        }
+
+        #imageUploadBtn:hover {
+            background: #667eea;
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        /* Settings Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .modal-button {
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .modal-button.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .modal-button.primary:hover {
+            background: #764ba2;
+        }
+
+        .modal-button.danger {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .modal-button.danger:hover {
+            background: #fdd;
+        }
+
+        /* Setup Panel */
+        #setupPanel {
+            background: #fef3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .setup-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .setup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .setup-form select,
+        .setup-form input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .setup-form button {
+            padding: 8px;
+            background: #ffc107;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .setup-form button:hover {
+            background: #ffb300;
+        }
+
+        /* Loading Overlay */
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 900;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #loadingOverlay.active {
+            display: flex;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Menu Button */
+        #menuBtn {
+            display: none;
+            background: none;
+            border: none;
+            color: #333;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -300px;
+                height: 100vh;
+                z-index: 500;
+                transition: left 0.3s;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            #menuBtn {
+                display: block;
+            }
+
+            .message-content {
+                max-width: 90%;
+            }
+
+            .auth-box {
+                max-width: 90%;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+            }
+
+            .quick-action {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Login & Registration Modal -->
-    <div class="auth-container" id="authContainer">
+    <!-- Auth Container -->
+    <div id="authContainer" class="auth-container">
         <div class="auth-box">
-            <div class="auth-header">
-                <h1>🤖 AI Chatbot</h1>
-                <p>Your Advanced AI Assistant</p>
-            </div>
+            <div id="authMessage" class="auth-message"></div>
 
             <!-- Login Form -->
-            <form id="loginForm" class="auth-form active">
-                <h2>Sign In</h2>
+            <form id="loginForm" class="active">
+                <h2 class="auth-title">Welcome Back</h2>
+                <p class="auth-subtitle">Login to your AI Chat account</p>
+
                 <div class="form-group">
                     <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                    <input type="email" id="loginEmail" required>
                 </div>
+
                 <div class="form-group">
                     <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    <input type="password" id="loginPassword" required>
                 </div>
-                <button type="submit" class="btn btn-auth">Sign In</button>
-                <p class="auth-toggle">Don't have an account? <a href="#" onclick="toggleAuthForm(event)">Sign Up</a></p>
+
+                <button type="submit" class="auth-button">Login</button>
+
+                <div class="auth-toggle">
+                    Don't have an account? <button type="button" onclick="toggleAuthForm(event)">Sign Up</button>
+                </div>
             </form>
 
-            <!-- Sign Up Form -->
-            <form id="signupForm" class="auth-form">
-                <h2>Create Account</h2>
+            <!-- Signup Form -->
+            <form id="signupForm">
+                <h2 class="auth-title">Create Account</h2>
+                <p class="auth-subtitle">Join the AI Chat revolution</p>
+
                 <div class="form-group">
                     <label for="signupName">Full Name</label>
-                    <input type="text" id="signupName" placeholder="Enter your full name" required>
+                    <input type="text" id="signupName" required>
                 </div>
+
                 <div class="form-group">
                     <label for="signupEmail">Email</label>
-                    <input type="email" id="signupEmail" placeholder="Enter your email" required>
+                    <input type="email" id="signupEmail" required>
                 </div>
+
                 <div class="form-group">
                     <label for="signupPassword">Password</label>
-                    <input type="password" id="signupPassword" placeholder="Create a password" required>
+                    <input type="password" id="signupPassword" required>
                 </div>
+
                 <div class="form-group">
                     <label for="signupConfirm">Confirm Password</label>
-                    <input type="password" id="signupConfirm" placeholder="Confirm your password" required>
+                    <input type="password" id="signupConfirm" required>
                 </div>
-                <button type="submit" class="btn btn-auth">Create Account</button>
-                <p class="auth-toggle">Already have an account? <a href="#" onclick="toggleAuthForm(event)">Sign In</a></p>
-            </form>
 
-            <div class="auth-message" id="authMessage"></div>
+                <button type="submit" class="auth-button">Sign Up</button>
+
+                <div class="auth-toggle">
+                    Already have an account? <button type="button" onclick="toggleAuthForm(event)">Login</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Main Application -->
-    <div class="app-wrapper" id="appWrapper" style="display:none;">
+    <!-- App Wrapper -->
+    <div id="appWrapper" style="display: none;">
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+        <div id="sidebar" class="sidebar">
             <div class="sidebar-header">
-                <h2>💬 Conversations</h2>
-                <button class="btn-icon" id="newChatBtn" title="New Chat">➕</button>
+                <span class="sidebar-logo">🤖 AI Chat</span>
             </div>
 
-            <div class="conversations-list" id="conversationsList">
-                <!-- Conversations populated here -->
+            <div class="sidebar-buttons">
+                <button id="newChatBtn" class="sidebar-btn">+ New Chat</button>
+                <button id="settingsBtn" class="sidebar-btn">⚙️ Settings</button>
+            </div>
+
+            <div class="conversations-section">
+                <div id="conversationsList"></div>
             </div>
 
             <div class="sidebar-footer">
                 <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <div class="user-details">
-                        <p class="user-name" id="userName">User</p>
-                        <p class="user-email" id="userEmail">user@example.com</p>
-                    </div>
-                </div>
-                <button class="btn-settings" id="settingsBtn" title="Settings">⚙️</button>
-                <button class="btn-logout" id="logoutBtn" title="Logout">🚪</button>
-            </div>
-        </aside>
-
-        <!-- Main Chat Area -->
-        <main class="chat-area">
-            <!-- Header -->
-            <header class="chat-header">
-                <div class="header-left">
-                    <button class="btn-menu" id="menuBtn">☰</button>
-                    <h1 id="chatTitle">New Conversation</h1>
-                </div>
-                <div class="header-right">
-                    <button class="btn-icon" id="shareBtn" title="Share">🔗</button>
-                    <button class="btn-icon" id="deleteBtn" title="Delete">🗑️</button>
-                </div>
-            </header>
-
-            <!-- Messages Container -->
-            <div class="messages-container" id="messagesContainer">
-                <div class="welcome-section">
-                    <div class="welcome-icon">🤖</div>
-                    <h2>Welcome to AI Chatbot</h2>
-                    <p>Ask me anything. I can analyze images, answer questions, and help you with any task.</p>
-                    <div class="quick-actions">
-                        <button class="quick-action" data-prompt="Write a creative story">📖 Story</button>
-                        <button class="quick-action" data-prompt="Analyze this image">🔍 Analyze</button>
-                        <button class="quick-action" data-prompt="Help me code">💻 Code</button>
-                        <button class="quick-action" data-prompt="Answer my question">❓ Question</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Input Area -->
-            <div class="input-section">
-                <!-- Setup Panel -->
-                <div class="setup-panel" id="setupPanel">
-                    <div class="setup-content">
-                        <h3>⚙️ API Configuration</h3>
-                        <div class="form-group">
-                            <label for="apiProvider">AI Provider</label>
-                            <select id="apiProvider">
-                                <option value="gemini">Google Gemini</option>
-                                <option value="claude">Anthropic Claude</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="apiKey">API Key</label>
-                            <input type="password" id="apiKey" placeholder="Enter your API key">
-                            <small>Get keys from <a href="https://makersuite.google.com/app/apikey" target="_blank">Gemini</a> or <a href="https://console.anthropic.com/" target="_blank">Claude</a></small>
-                        </div>
-                        <button id="saveConfig" class="btn btn-primary">Save Configuration</button>
-                    </div>
-                </div>
-
-                <!-- Message Input -->
-                <div class="input-area">
-                    <!-- Image Preview -->
-                    <div class="image-preview-container" id="imagePreviewContainer"></div>
-
-                    <!-- Input Row -->
-                    <div class="input-row">
-                        <div class="input-actions">
-                            <button class="btn-action" id="imageUploadBtn" title="Upload Image">📷</button>
-                            <input type="file" id="imageInput" accept="image/*" multiple style="display:none;">
-                        </div>
-                        <textarea id="messageInput" placeholder="Ask me anything... (Shift+Enter for new line)" rows="1"></textarea>
-                        <button class="btn-send" id="sendBtn">
-                            <span>Send</span>
-                            <span class="send-icon">→</span>
-                        </button>
-                    </div>
-                    <p class="input-hint">Press Enter to send • Shift+Enter for new line</p>
-                </div>
-            </div>
-        </main>
-
-        <!-- Settings Modal -->
-        <div class="modal" id="settingsModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Settings</h2>
-                    <button class="btn-close" id="closeSettings">✕</button>
-                </div>
-                <div class="modal-body">
-                    <div class="settings-section">
-                        <h3>Appearance</h3>
-                        <div class="setting-item">
-                            <label>Theme</label>
-                            <select id="themeSelect">
-                                <option value="light">Light</option>
-                                <option value="dark">Dark</option>
-                                <option value="auto">Auto</option>
-                            </select>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div id="userAvatar" class="user-avatar"></div>
+                        <div style="flex: 1;">
+                            <div id="userName" style="font-weight: 600;"></div>
+                            <div id="userEmail" style="font-size: 11px; color: #999; word-break: break-all;"></div>
                         </div>
                     </div>
-                    <div class="settings-section">
-                        <h3>API Settings</h3>
-                        <div class="setting-item">
-                            <label for="providerSelect">AI Provider</label>
-                            <select id="providerSelect">
-                                <option value="gemini">Google Gemini</option>
-                                <option value="claude">Anthropic Claude</option>
-                            </select>
-                        </div>
-                        <div class="setting-item">
-                            <label for="apiKeyDisplay">API Key</label>
-                            <input type="password" id="apiKeyDisplay" readonly>
-                            <button class="btn-secondary" id="changeApiBtn">Change API Key</button>
-                        </div>
-                    </div>
-                    <div class="settings-section">
-                        <h3>Account</h3>
-                        <button class="btn-danger" id="deleteAccountBtn">Delete Account</button>
-                    </div>
+                </div>
+                <div class="footer-buttons">
+                    <button id="logoutBtn" class="footer-btn">Logout</button>
+                    <button id="hiddenModeBtn" class="footer-btn hidden-mode-btn">🕵️ Hidden Mode</button>
                 </div>
             </div>
         </div>
 
-        <!-- Loading Indicator -->
-        <div class="loading-overlay" id="loadingOverlay">
-            <div class="loader"></div>
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <button id="menuBtn">☰</button>
+
+            <div class="chat-header">
+                <div class="chat-title" id="chatTitle">New Conversation</div>
+                <div class="chat-actions">
+                    <button id="shareBtn" class="chat-action-btn">Share</button>
+                    <button id="deleteBtn" class="chat-action-btn">Delete</button>
+                </div>
+            </div>
+
+            <div id="messagesContainer" class="messages-container">
+                <div class="welcome-section">
+                    <div class="welcome-icon">🤖</div>
+                    <h2>Welcome to AI Chat</h2>
+                    <p>Start a conversation with your AI assistant</p>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div id="setupPanel">
+                    <div class="setup-title">⚠️ Configure API Key First</div>
+                    <div class="setup-form">
+                        <select id="apiProviderSelect">
+                            <option value="gemini">Google Gemini</option>
+                            <option value="claude">Claude (Anthropic)</option>
+                        </select>
+                        <input type="password" id="apiKey" placeholder="Enter your API key">
+                        <button type="button" id="saveConfigBtn">Save Configuration</button>
+                    </div>
+                </div>
+
+                <div id="imagePreviewContainer" class="image-preview-container"></div>
+
+                <div class="input-wrapper">
+                    <textarea id="messageInput" placeholder="Type your message... (Shift+Enter for new line)" rows="2"></textarea>
+                    <div class="input-buttons">
+                        <button id="imageUploadBtn" class="input-button">📎 Image</button>
+                        <button id="sendBtn" class="input-button">Send</button>
+                    </div>
+                </div>
+                <input type="file" id="imageInput" accept="image/*" multiple>
+            </div>
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Settings
+                <button id="closeSettings" class="modal-close">×</button>
+            </div>
+
+            <div class="modal-section">
+                <h3>API Configuration</h3>
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                    <select id="providerSelect">
+                        <option value="gemini">Google Gemini</option>
+                        <option value="claude">Claude (Anthropic)</option>
+                    </select>
+                </div>
+                <input type="password" id="apiKeyDisplay" placeholder="API Key" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 8px;">
+                <button id="changeApiBtn" class="modal-button primary" style="width: 100%;">Change API Key</button>
+            </div>
+
+            <div class="modal-section">
+                <h3>Appearance</h3>
+                <select id="themeSelect">
+                    <option value="light">Light Theme</option>
+                    <option value="dark">Dark Theme</option>
+                </select>
+            </div>
+
+            <div class="modal-section">
+                <h3>Account</h3>
+                <div class="modal-buttons">
+                    <button id="deleteAccountBtn" class="modal-button danger">Delete Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Scripts -->
     <script src="db.js"></script>
+    <script src="auth.js"></script>
     <script src="config.js"></script>
     <script src="api.js"></script>
-    <script src="auth.js"></script>
     <script src="app.js"></script>
+
+    <script>
+        // Hidden Mode - Opens in about:blank window
+        document.getElementById('hiddenModeBtn').addEventListener('click', () => {
+            const newWindow = window.open('about:blank', 'HiddenMode', 'width=1200,height=800');
+            newWindow.document.write(document.documentElement.outerHTML);
+            newWindow.document.close();
+        });
+    </script>
 </body>
 </html>
